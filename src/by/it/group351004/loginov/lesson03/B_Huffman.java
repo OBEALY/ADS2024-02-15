@@ -2,9 +2,8 @@ package by.it.group351004.loginov.lesson03;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
+
 // Lesson 3. B_Huffman.
 // Восстановите строку по её коду и беспрефиксному коду символов.
 
@@ -41,38 +40,66 @@ import java.util.HashMap;
 //        Sample Output 2:
 //        abacabad
 
+
+
+
+
 public class B_Huffman {
 
     String decode(File file) throws FileNotFoundException {
-        StringBuilder result=new StringBuilder();
+        StringBuilder result = new StringBuilder();
         //прочитаем строку для кодирования из тестового файла
         Scanner scanner = new Scanner(file);
-        Integer count = scanner.nextInt();
-        Integer length = scanner.nextInt();
+        Integer count = scanner.nextInt(); // 4
+        Integer length = scanner.nextInt(); // 14
+        scanner.nextLine();
+
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! НАЧАЛО ЗАДАЧИ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
         //тут запишите ваше решение
-        Map<String, Character> codes = new HashMap<>();
-        for (int i = 0; i < count; i++) {
-            Character ch = scanner.next().toCharArray()[0];
-            String temp = scanner.next();
-            codes.put(temp, ch);
-        }
-        String toEncode = scanner.next();
+        Node node = getNode(count, scanner);
+        String input = scanner.nextLine();
+
         int i = 0;
-        String temp = "";
-        while (i < toEncode.length()){
-            temp += toEncode.charAt(i);
-            if (codes.containsKey(temp)){
-                result.append(codes.get(temp));
-                temp = "";
-            }
-            i++;
-        }
-
-
-
+        while (i < input.length())
+            i = node.getEncode(result, node, "", input, i);
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! КОНЕЦ ЗАДАЧИ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
         return result.toString(); //01001100100111
+    }
+
+    public Node getNode(Integer count, Scanner scanner) {
+        ArrayList<Node> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            String[] strArr = scanner.nextLine().split(": ");
+            list.add(new Node(strArr[1], strArr[0].charAt(0)));
+        }
+        while (list.size() > 1) {
+            Node parent = new Node(list.remove(list.size() - 2), list.remove(list.size() - 1));
+            list.add(parent);
+        }
+        return list.get(0);
+    }
+
+    private class Node {
+        String content;
+        char letter;
+        Node left;
+        Node right;
+        Node (String content, char letter) {
+            this.content = content;
+            this.letter = letter;
+        }
+        Node (Node left, Node right) {
+            this.left = left;
+            this.right = right;
+        }
+        int getEncode (StringBuilder result, Node node, String temp, String input, int i) {
+            if (node.content != null && node.content.equals(temp)) {
+                result.append(node.letter);
+                return i;
+            } else
+                i = (input.charAt(i) == '1') ? node.right.getEncode(result, node.right, temp + input.charAt(i), input, ++i) : node.left.getEncode(result, node.left,temp + input.charAt(i), input, ++i);
+            return i;
+        }
     }
 
     public static void main(String[] args) throws FileNotFoundException {
